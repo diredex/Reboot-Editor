@@ -10,6 +10,7 @@
 #include "Misc/MessageDialog.h"
 #include "GenericPlatform/GenericPlatformMisc.h"
 #include "Misc/CommandLine.h"
+#include "Editor/UnrealEd/Public/UnrealEdMisc.h"
 
 static const FName RebootTabName("Reboot");
 
@@ -30,6 +31,12 @@ void FRebootModule::StartupModule()
 		FRebootCommands::Get().PluginAction,
 		FExecuteAction::CreateRaw(this, &FRebootModule::PluginButtonClicked),
 		FCanExecuteAction());
+
+	// Map the Force Restart action to the ForceRestartEditor function
+	PluginCommands->MapAction(
+		FRebootCommands::Get().ForceRestartAction,
+		FExecuteAction::CreateRaw(this, &FRebootModule::ForceRestartEditor)
+	);
 
 	UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateRaw(this, &FRebootModule::RegisterMenus));
 }
@@ -64,6 +71,15 @@ void FRebootModule::PluginButtonClicked()
 	}
 }
 
+void FRebootModule::ForceRestartEditor()
+{
+	// Log the force restart action
+	UE_LOG(LogTemp, Log, TEXT(" Force Restarting editor"));
+
+	// Directly restart the editor without showing a confirmation dialog
+	FUnrealEdMisc::Get().RestartEditor(false);
+}
+
 void FRebootModule::RegisterMenus()
 {
 	// Owner will be used for cleanup in call to UToolMenus::UnregisterOwner
@@ -74,6 +90,11 @@ void FRebootModule::RegisterMenus()
 		{
 			FToolMenuSection& Section = Menu->FindOrAddSection("WindowLayout");
 			Section.AddMenuEntryWithCommandList(FRebootCommands::Get().PluginAction, PluginCommands);
+
+			// TODO: Menu Icon Needed.
+			Section.AddMenuEntryWithCommandList(
+				FRebootCommands::Get().ForceRestartAction,
+				PluginCommands);
 		}
 	}
 
@@ -84,6 +105,12 @@ void FRebootModule::RegisterMenus()
 			{
 				FToolMenuEntry& Entry = Section.AddEntry(FToolMenuEntry::InitToolBarButton(FRebootCommands::Get().PluginAction));
 				Entry.SetCommandList(PluginCommands);
+
+				// TODO: Toolbar Icon needed.
+				FToolMenuEntry& ForceRestartEntry = Section.AddEntry(
+					FToolMenuEntry::InitToolBarButton(FRebootCommands::Get().ForceRestartAction)
+				);
+				ForceRestartEntry.SetCommandList(PluginCommands);
 			}
 		}
 	}
