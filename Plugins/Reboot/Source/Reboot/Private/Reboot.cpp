@@ -5,6 +5,11 @@
 #include "RebootCommands.h"
 #include "Misc/MessageDialog.h"
 #include "ToolMenus.h"
+#include "HAL/PlatformProcess.h"
+#include "HAL/PlatformMisc.h"
+#include "Misc/MessageDialog.h"
+#include "GenericPlatform/GenericPlatformMisc.h"
+#include "Misc/CommandLine.h"
 
 static const FName RebootTabName("Reboot");
 
@@ -45,13 +50,18 @@ void FRebootModule::ShutdownModule()
 
 void FRebootModule::PluginButtonClicked()
 {
-	// Put your "OnButtonClicked" stuff here
-	FText DialogText = FText::Format(
-							LOCTEXT("PluginButtonDialogText", "Add code to {0} in {1} to override this button's actions"),
-							FText::FromString(TEXT("FRebootModule::PluginButtonClicked()")),
-							FText::FromString(TEXT("Reboot.cpp"))
-					   );
-	FMessageDialog::Open(EAppMsgType::Ok, DialogText);
+	const FText DialogText = LOCTEXT("RestartEditorDialog", "Do you want to restart the editor?");
+	const auto Result = FMessageDialog::Open(EAppMsgType::YesNo, DialogText);
+
+	if (Result == EAppReturnType::Yes)
+	{
+		// Use Unreal Engine's built-in method to restart the editor
+		FUnrealEdMisc::Get().RestartEditor(false); // 'false' prevents showing the crash reporter
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("User cancelled editor restart."));
+	}
 }
 
 void FRebootModule::RegisterMenus()
