@@ -5,6 +5,12 @@
 #include "RebootCommands.h"
 #include "Misc/MessageDialog.h"
 #include "ToolMenus.h"
+#include "HAL/PlatformProcess.h"
+#include "HAL/PlatformMisc.h"
+#include "Misc/MessageDialog.h"
+#include "GenericPlatform/GenericPlatformMisc.h"
+#include "Misc/CommandLine.h"
+#include "Editor/UnrealEd/Public/UnrealEdMisc.h"
 
 static const FName RebootTabName("Reboot");
 
@@ -26,6 +32,12 @@ void FRebootModule::StartupModule()
 		FExecuteAction::CreateRaw(this, &FRebootModule::PluginButtonClicked),
 		FCanExecuteAction());
 
+	// Map the Force Restart action to the ForceRestartEditor function
+	PluginCommands->MapAction(
+		FRebootCommands::Get().ForceRestartAction,
+		FExecuteAction::CreateRaw(this, &FRebootModule::ForceRestartEditor)
+	);
+
 	UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateRaw(this, &FRebootModule::RegisterMenus));
 }
 
@@ -45,13 +57,27 @@ void FRebootModule::ShutdownModule()
 
 void FRebootModule::PluginButtonClicked()
 {
-	// Put your "OnButtonClicked" stuff here
-	FText DialogText = FText::Format(
-							LOCTEXT("PluginButtonDialogText", "Add code to {0} in {1} to override this button's actions"),
-							FText::FromString(TEXT("FRebootModule::PluginButtonClicked()")),
-							FText::FromString(TEXT("Reboot.cpp"))
-					   );
-	FMessageDialog::Open(EAppMsgType::Ok, DialogText);
+	const FText DialogText = LOCTEXT("RestartEditorDialog", "Do you want to restart the editor?");
+	const auto Result = FMessageDialog::Open(EAppMsgType::YesNo, DialogText);
+
+	if (Result == EAppReturnType::Yes)
+	{
+		// Use Unreal Engine's built-in method to restart the editor
+		FUnrealEdMisc::Get().RestartEditor(false); // 'false' prevents showing the crash reporter
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("User cancelled editor restart."));
+	}
+}
+
+void FRebootModule::ForceRestartEditor()
+{
+	// Log the force restart action
+	UE_LOG(LogTemp, Log, TEXT(" Force Restarting editor"));
+
+	// Directly restart the editor without showing a confirmation dialog
+	FUnrealEdMisc::Get().RestartEditor(false);
 }
 
 void FRebootModule::RegisterMenus()
@@ -64,6 +90,11 @@ void FRebootModule::RegisterMenus()
 		{
 			FToolMenuSection& Section = Menu->FindOrAddSection("WindowLayout");
 			Section.AddMenuEntryWithCommandList(FRebootCommands::Get().PluginAction, PluginCommands);
+
+			// TODO: Menu Icon Needed.
+			Section.AddMenuEntryWithCommandList(
+				FRebootCommands::Get().ForceRestartAction,
+				PluginCommands);
 		}
 	}
 
@@ -74,6 +105,12 @@ void FRebootModule::RegisterMenus()
 			{
 				FToolMenuEntry& Entry = Section.AddEntry(FToolMenuEntry::InitToolBarButton(FRebootCommands::Get().PluginAction));
 				Entry.SetCommandList(PluginCommands);
+
+				// TODO: Toolbar Icon needed.
+				FToolMenuEntry& ForceRestartEntry = Section.AddEntry(
+					FToolMenuEntry::InitToolBarButton(FRebootCommands::Get().ForceRestartAction)
+				);
+				ForceRestartEntry.SetCommandList(PluginCommands);
 			}
 		}
 	}
