@@ -11,6 +11,7 @@
 #include "GenericPlatform/GenericPlatformMisc.h"
 #include "Misc/CommandLine.h"
 #include "Editor/UnrealEd/Public/UnrealEdMisc.h"
+#include "InstanceManager.h"
 
 static const FName RebootTabName("Reboot");
 
@@ -24,6 +25,22 @@ void FRebootModule::StartupModule()
 	FRebootStyle::ReloadTextures();
 
 	FRebootCommands::Register();
+
+	if (!FInstanceManager::IsPrimaryInstance())
+	{
+		const FText DialogText = FText::FromString(
+			"Another instance of this project is already running. Do you want to terminate it and continue?");
+		const EAppReturnType::Type Result = FMessageDialog::Open(EAppMsgType::YesNo, DialogText);
+
+		if (Result == EAppReturnType::Yes)
+		{
+			FInstanceManager::ForceAcquireLock();
+		}
+		else
+		{
+			FPlatformMisc::RequestExit(false); // Exit without errors
+		}
+	}
 	
 	PluginCommands = MakeShareable(new FUICommandList);
 
@@ -53,6 +70,8 @@ void FRebootModule::ShutdownModule()
 	FRebootStyle::Shutdown();
 
 	FRebootCommands::Unregister();
+
+	FInstanceManager::ReleaseLock();
 }
 
 void FRebootModule::PluginButtonClicked()
