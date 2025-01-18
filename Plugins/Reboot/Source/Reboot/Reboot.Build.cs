@@ -26,6 +26,7 @@ public class Reboot : ModuleRules
 			new string[]
 			{
 				"Core",
+				"DeveloperSettings"
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);
@@ -43,6 +44,7 @@ public class Reboot : ModuleRules
 				"Engine",
 				"Slate",
 				"SlateCore",
+				"DeveloperSettings"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

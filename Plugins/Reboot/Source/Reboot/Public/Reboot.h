@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
+#include "Engine/Engine.h"
 
 class FToolBarBuilder;
 class FMenuBuilder;
@@ -18,10 +19,12 @@ public:
 	
 	/** This function will be bound to Command. */
 	void PluginButtonClicked();
+	void ForceRestartEditor();
 	
 private:
 
 	void RegisterMenus();
+	void PrintWarning(const FString& Message, float Duration = 0.f);
 
 
 private:
