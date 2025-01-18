@@ -12,6 +12,8 @@
 #include "Misc/CommandLine.h"
 #include "Editor/UnrealEd/Public/UnrealEdMisc.h"
 #include "InstanceManager.h"
+#include "ISettingsModule.h"
+#include "RebootSettings.h"
 
 static const FName RebootTabName("Reboot");
 
@@ -20,40 +22,91 @@ static const FName RebootTabName("Reboot");
 void FRebootModule::StartupModule()
 {
 	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
-	
+	const URebootSettings* Settings = GetDefault<URebootSettings>();
 	FRebootStyle::Initialize();
 	FRebootStyle::ReloadTextures();
 
 	FRebootCommands::Register();
 
-	if (!FInstanceManager::IsPrimaryInstance())
+	// Register the settings
+	if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
 	{
-		const FText DialogText = FText::FromString(
-			"Another instance of this project is already running. Do you want to terminate it and continue?");
-		const EAppReturnType::Type Result = FMessageDialog::Open(EAppMsgType::YesNo, DialogText);
-
-		if (Result == EAppReturnType::Yes)
-		{
-			FInstanceManager::ForceAcquireLock();
-		}
-		else
-		{
-			FPlatformMisc::RequestExit(false); // Exit without errors
-		}
+		SettingsModule->RegisterSettings(
+			"Editor",                  // Category
+			"Plugins",                 // Section
+			"Reboot",                  // Name
+			LOCTEXT("RebootSettingsName", "Reboot Settings"),
+			LOCTEXT("RebootSettingsDescription", "Configure Reboot plugin settings."),
+			GetMutableDefault<URebootSettings>()
+		);
 	}
 	
 	PluginCommands = MakeShareable(new FUICommandList);
-
-	PluginCommands->MapAction(
-		FRebootCommands::Get().PluginAction,
-		FExecuteAction::CreateRaw(this, &FRebootModule::PluginButtonClicked),
-		FCanExecuteAction());
-
+	
 	// Map the Force Restart action to the ForceRestartEditor function
 	PluginCommands->MapAction(
 		FRebootCommands::Get().ForceRestartAction,
 		FExecuteAction::CreateRaw(this, &FRebootModule::ForceRestartEditor)
 	);
+
+
+	if (Settings->bForceRestartDefault)
+	{
+		PluginCommands->MapAction(
+		FRebootCommands::Get().PluginAction,
+		FExecuteAction::CreateRaw(this, &FRebootModule::ForceRestartEditor),
+		FCanExecuteAction());
+	}
+
+	else
+	{
+		PluginCommands->MapAction(
+		FRebootCommands::Get().PluginAction,
+		FExecuteAction::CreateRaw(this, &FRebootModule::PluginButtonClicked),
+		FCanExecuteAction());
+	}
+
+	
+	if (Settings->bCheckForMultipleInstances)
+	{
+		if (Settings->bAllowMultipleInstances)
+		{
+			if (!FInstanceManager::IsPrimaryInstance())
+			{
+				FText Message = FText::FromString(TEXT("Another Instance is Already running"));
+    
+				// Show the Yes/No dialog box
+				EAppReturnType::Type Response = FMessageDialog::Open(EAppMsgType::Ok, Message);
+			}
+			
+		}
+
+		if (!Settings->bAllowMultipleInstances)
+		{
+			if (!FInstanceManager::IsPrimaryInstance())
+			{
+				if (Settings->bAutoCloseMultipleInstances)
+				{
+					FInstanceManager::ForceAcquireLock();
+				}
+				else
+				{
+					const FText DialogText = FText::FromString(
+					"Another instance of this project is already running. Do you want to terminate it and continue?");
+					const EAppReturnType::Type Result = FMessageDialog::Open(EAppMsgType::YesNo, DialogText);
+
+					if (Result == EAppReturnType::Yes)
+					{
+						FInstanceManager::ForceAcquireLock();
+					}
+					else
+					{
+						FPlatformMisc::RequestExit(true); // Exit without errors
+					}
+				}
+			}
+		}
+	}
 
 	UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateRaw(this, &FRebootModule::RegisterMenus));
 }
@@ -72,6 +125,12 @@ void FRebootModule::ShutdownModule()
 	FRebootCommands::Unregister();
 
 	FInstanceManager::ReleaseLock();
+
+	// Unregister the settings
+	if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
+	{
+		SettingsModule->UnregisterSettings("Editor", "Plugins", "Reboot");
+	}
 }
 
 void FRebootModule::PluginButtonClicked()
@@ -132,6 +191,14 @@ void FRebootModule::RegisterMenus()
 				ForceRestartEntry.SetCommandList(PluginCommands);
 			}
 		}
+	}
+}
+
+void FRebootModule::PrintWarning(const FString& Message, float Duration)
+{
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Red, Message);
 	}
 }
 

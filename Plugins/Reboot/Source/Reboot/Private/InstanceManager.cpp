@@ -2,6 +2,7 @@
 #include "HAL/FileManager.h"
 #include "Misc/Paths.h"
 #include "Misc/MessageDialog.h"
+#include "RebootSettings.h"
 
 #if PLATFORM_WINDOWS
 #include "Windows/WindowsHWrapper.h"
