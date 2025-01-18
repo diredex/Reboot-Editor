@@ -168,8 +168,7 @@ void FRebootModule::RegisterMenus()
 		{
 			FToolMenuSection& Section = Menu->FindOrAddSection("WindowLayout");
 			Section.AddMenuEntryWithCommandList(FRebootCommands::Get().PluginAction, PluginCommands);
-
-			// TODO: Menu Icon Needed.
+			
 			Section.AddMenuEntryWithCommandList(
 				FRebootCommands::Get().ForceRestartAction,
 				PluginCommands);
@@ -184,11 +183,11 @@ void FRebootModule::RegisterMenus()
 				FToolMenuEntry& Entry = Section.AddEntry(FToolMenuEntry::InitToolBarButton(FRebootCommands::Get().PluginAction));
 				Entry.SetCommandList(PluginCommands);
 
-				// TODO: Toolbar Icon needed.
-				FToolMenuEntry& ForceRestartEntry = Section.AddEntry(
-					FToolMenuEntry::InitToolBarButton(FRebootCommands::Get().ForceRestartAction)
-				);
-				ForceRestartEntry.SetCommandList(PluginCommands);
+				// TODO: Toolbar Force Restart Feature.
+				// FToolMenuEntry& ForceRestartEntry = Section.AddEntry(
+				// 	FToolMenuEntry::InitToolBarButton(FRebootCommands::Get().ForceRestartAction)
+				// );
+				// ForceRestartEntry.SetCommandList(PluginCommands);
 			}
 		}
 	}

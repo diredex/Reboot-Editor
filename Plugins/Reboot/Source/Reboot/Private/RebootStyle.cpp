@@ -44,6 +44,7 @@ TSharedRef< FSlateStyleSet > FRebootStyle::Create()
 	Style->SetContentRoot(IPluginManager::Get().FindPlugin("Reboot")->GetBaseDir() / TEXT("Resources"));
 
 	Style->Set("Reboot.PluginAction", new IMAGE_BRUSH_SVG(TEXT("PlaceholderButtonIcon"), Icon20x20));
+	Style->Set("Reboot.ForceRestartAction", new IMAGE_BRUSH_SVG(TEXT("forcerestarticon"), Icon20x20));
 	return Style;
 }
 
