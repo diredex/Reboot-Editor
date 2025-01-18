@@ -1,4 +1,6 @@
-﻿#pragma once
+﻿// Copyright Ninth Spark Interactive, Inc. All Rights Reserved.
+
+#pragma once
 
 #include "CoreMinimal.h"
 #include "Engine/DeveloperSettings.h"

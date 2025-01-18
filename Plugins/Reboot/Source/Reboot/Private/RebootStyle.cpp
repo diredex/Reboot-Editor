@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// Copyright Ninth Spark Interactive, Inc. All Rights Reserved.
 
 #include "RebootStyle.h"
 #include "Reboot.h"

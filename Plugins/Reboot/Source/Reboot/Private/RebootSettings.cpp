@@ -1,4 +1,6 @@
-﻿#include "RebootSettings.h"
+﻿// Copyright Ninth Spark Interactive, Inc. All Rights Reserved.
+
+#include "RebootSettings.h"
 
 URebootSettings::URebootSettings()
 	: bForceRestartDefault(false)           // Default: Force restart is disabled

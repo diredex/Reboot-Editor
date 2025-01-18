@@ -1,4 +1,6 @@
-﻿#include "InstanceManager.h"
+﻿// Copyright Ninth Spark Interactive, Inc. All Rights Reserved.
+
+#include "InstanceManager.h"
 #include "HAL/FileManager.h"
 #include "Misc/Paths.h"
 #include "Misc/MessageDialog.h"
