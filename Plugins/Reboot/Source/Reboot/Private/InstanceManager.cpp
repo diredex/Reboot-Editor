@@ -3,6 +3,7 @@
 #include "InstanceManager.h"
 #include "HAL/FileManager.h"
 #include "Misc/Paths.h"
+#include "Misc/FileHelper.h"
 #include "Misc/MessageDialog.h"
 #include "RebootSettings.h"
 
