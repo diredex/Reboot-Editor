@@ -1,5 +1,4 @@
-﻿// Copyright Ninth Spark Interactive, Inc. All Rights Reserved.
-
+﻿// Copyright (c) 2026 Ninth Spark Interactive. All Rights Reserved.
 #include "RebootSettings.h"
 
 URebootSettings::URebootSettings()

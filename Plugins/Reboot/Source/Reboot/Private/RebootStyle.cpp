@@ -1,5 +1,4 @@
-// Copyright Ninth Spark Interactive, Inc. All Rights Reserved.
-
+// Copyright (c) 2026 Ninth Spark Interactive. All Rights Reserved.
 #include "RebootStyle.h"
 #include "Reboot.h"
 #include "Framework/Application/SlateApplication.h"

@@ -19,6 +19,11 @@
 			"Name": "Reboot",
 			"Type": "Editor",
 			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Win64",
+				"Mac",
+				"Linux"
+			],
 			"AdditionalDependencies": [
 				"EditorStyle",
 				"LevelEditor"
